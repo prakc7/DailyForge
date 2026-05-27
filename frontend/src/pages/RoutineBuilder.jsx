@@ -41,6 +41,37 @@ const colorFromKey = (value) => {
   return EVENT_COLORS[Math.abs(hash) % EVENT_COLORS.length];
 };
 
+const ROUTINE_DRAFT_STORAGE_KEY = "dailyforge:routine-builder:draft";
+
+const safeReadDraft = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(ROUTINE_DRAFT_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    console.warn("Failed to read routine draft", error);
+    return null;
+  }
+};
+
+const safeWriteDraft = (draft) => {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(ROUTINE_DRAFT_STORAGE_KEY, JSON.stringify(draft));
+  } catch (error) {
+    console.warn("Failed to save routine draft", error);
+  }
+};
+
+const safeClearDraft = () => {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(ROUTINE_DRAFT_STORAGE_KEY);
+  } catch (error) {
+    console.warn("Failed to clear routine draft", error);
+  }
+};
+
 export default function RoutineBuilder() {
   const { addTask, tasks } = useTasks();
   const navigate = useNavigate();
@@ -56,6 +87,7 @@ export default function RoutineBuilder() {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [routineName, setRoutineName] = useState("");
   const [description, setDescription] = useState("");
+  const [isDraftHydrated, setIsDraftHydrated] = useState(false);
   const gridRef = useRef(null);
 
   const exportToImage = async () => {
@@ -143,6 +175,7 @@ export default function RoutineBuilder() {
         items,
       });
 
+      safeClearDraft();
       setIsSaveModalOpen(false);
       setRoutineName("");
       setDescription("");
@@ -248,6 +281,25 @@ export default function RoutineBuilder() {
 
     setScheduledTasks((prev) => [...prev, duplicate]);
   };
+
+  useEffect(() => {
+    const draft = safeReadDraft();
+    if (draft) {
+      if (Array.isArray(draft.scheduledTasks)) setScheduledTasks(draft.scheduledTasks);
+      if (typeof draft.routineName === "string") setRoutineName(draft.routineName);
+      if (typeof draft.description === "string") setDescription(draft.description);
+    }
+    setIsDraftHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isDraftHydrated) return;
+    safeWriteDraft({
+      scheduledTasks,
+      routineName,
+      description,
+    });
+  }, [scheduledTasks, routineName, description, isDraftHydrated]);
 
   // Removed task-dependent effect; routine events are now free-text and multi-day
 

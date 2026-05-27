@@ -180,10 +180,10 @@ export default function WeeklyGrid({
       <div className="w-full pb-2">
         <div
           className="grid border border-soft/30 rounded-xl overflow-hidden bg-white/0"
-          style={{ gridTemplateColumns: "120px 1fr" }}
+          style={{ gridTemplateColumns: "minmax(88px, 120px) minmax(0, 1fr)" }}
         >
           <div>
-            <div className="text-xs font-semibold text-muted uppercase tracking-wider px-2 py-2 border-r border-b border-soft/30 bg-white/5 dark:bg-slate-900/10">
+            <div className="text-[11px] sm:text-xs font-semibold text-muted uppercase tracking-wider px-2 py-2 border-r border-b border-soft/30 bg-white/5 dark:bg-slate-900/10">
               Days
             </div>
 
@@ -191,11 +191,11 @@ export default function WeeklyGrid({
               <div
                 key={`${day}-${dateLabel}`}
                 style={{ height: `${rowHeights[day]}px` }}
-                  className={`px-2 py-2 text-sm font-semibold text-main border-r border-b border-soft/30 ${isToday ? "bg-teal-500/10" : "bg-white/0"}`}
+                className={`px-2 py-2 text-sm font-semibold text-main border-r border-b border-soft/30 ${isToday ? "bg-teal-500/10" : "bg-white/0"}`}
               >
                 <div className="flex flex-col gap-0.5 leading-tight">
                   <span>{day}</span>
-                  <span className="text-[12px] font-medium text-muted whitespace-nowrap">{dateLabel}</span>
+                  <span className="text-[11px] sm:text-[12px] font-medium text-muted whitespace-nowrap">{dateLabel}</span>
                 </div>
               </div>
             ))}
