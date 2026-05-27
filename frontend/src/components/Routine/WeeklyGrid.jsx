@@ -84,16 +84,17 @@ const getDaySequenceFromDate = (date) => {
   return sequence;
 };
 
-const getMinuteGeometry = (startTime, duration, totalWidth) => {
+const getMinuteGeometry = (startTime, duration) => {
   const clampedStart = Math.max(START_MINUTES, Math.min(END_MINUTES, startTime));
   const clampedEnd = Math.max(clampedStart, Math.min(END_MINUTES, startTime + duration));
   const minutesFromStart = clampedStart - START_MINUTES;
   const durationMinutes = Math.max(1, clampedEnd - clampedStart);
-  const pixelsPerMinute = totalWidth / TOTAL_MINUTES;
+  const leftPct = (minutesFromStart / TOTAL_MINUTES) * 100;
+  const widthPct = (durationMinutes / TOTAL_MINUTES) * 100;
 
   return {
-    leftPx: minutesFromStart * pixelsPerMinute,
-    widthPx: durationMinutes * pixelsPerMinute,
+    leftPct,
+    widthPct,
     snappedStart: clampedStart,
     snappedEnd: clampedEnd,
   };
@@ -229,7 +230,7 @@ export default function WeeklyGrid({
                       className="border-b border-soft/30 last:border-b-0"
                     >
                       <div
-                        className={`relative ${isToday ? "bg-teal-500/5" : "bg-transparent"}`}
+                        className={`relative overflow-hidden ${isToday ? "bg-teal-500/5" : "bg-transparent"}`}
                         style={{ height: `${rowHeight}px` }}
                       >
                         <div
@@ -245,10 +246,9 @@ export default function WeeklyGrid({
                         </div>
 
                         {dayLayout.tasks.map((event) => {
-                          const { leftPx, widthPx, snappedStart, snappedEnd } = getMinuteGeometry(
+                          const { leftPct, widthPct, snappedStart, snappedEnd } = getMinuteGeometry(
                             event.startTime,
                             event.duration,
-                            timelineMinWidth,
                           );
 
                           return (
@@ -258,8 +258,8 @@ export default function WeeklyGrid({
                               onClick={() => setSelectedEvent(event)}
                               className="absolute text-left rounded-md text-white px-2 py-1 leading-none transition-colors cursor-pointer"
                               style={{
-                                left: `${leftPx}px`,
-                                width: `${Math.max(widthPx, 8)}px`,
+                                left: `${leftPct}%`,
+                                width: `${Math.max(widthPct, 1)}%`,
                                 top: `${ROW_VERTICAL_PADDING + (event.lane * (EVENT_HEIGHT + LANE_GAP))}px`,
                                 backgroundColor: event.color || "#0f766e",
                                 height: `${EVENT_HEIGHT}px`,
