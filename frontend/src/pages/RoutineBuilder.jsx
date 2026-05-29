@@ -169,17 +169,29 @@ export default function RoutineBuilder() {
     }));
 
     try {
-      await api.post("/routines", {
+      const res = await api.post("/routines", {
         name: routineName,
         description,
         items,
       });
 
-      safeClearDraft();
-      setIsSaveModalOpen(false);
-      setRoutineName("");
-      setDescription("");
-      alert("Routine saved successfully");
+safeClearDraft();
+
+const createdRoutine = res.data.routine || res.data.routines?.[0];
+
+if (createdRoutine) {
+  setSavedRoutines((prevRoutines) => [
+    createdRoutine,
+    ...prevRoutines.filter(
+      (routine) => routine._id !== createdRoutine._id
+    ),
+  ]);
+}
+
+setIsSaveModalOpen(false);
+setRoutineName("");
+setDescription("");
+alert("Routine saved successfully");
     } catch (err) {
       console.error(err);
       const errorMessage = err.response?.data?.message || "Failed to save routine";
